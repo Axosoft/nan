@@ -15,7 +15,7 @@ class MyObject : public ObjectWrap {
   static NAN_MODULE_INIT(Init) {
     v8::Local<v8::FunctionTemplate> tpl = Nan::New<v8::FunctionTemplate>(New);
     tpl->SetClassName(Nan::New("MyObject").ToLocalChecked());
-    tpl->InstanceTemplate()->SetInternalFieldCount(1);
+    tpl->InstanceTemplate()->SetInternalFieldCount(2);
 
     SetPrototypeMethod(tpl, "getHandle", GetHandle);
     SetPrototypeMethod(tpl, "getHandleConst", GetHandleConst);

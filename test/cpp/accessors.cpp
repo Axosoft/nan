@@ -46,7 +46,7 @@ NAN_MODULE_INIT(SetterGetter::Init) {
     Nan::New<v8::FunctionTemplate>(SetterGetter::New);
   settergetter_constructor.Reset(tpl);
   tpl->SetClassName(Nan::New<v8::String>("SetterGetter").ToLocalChecked());
-  tpl->InstanceTemplate()->SetInternalFieldCount(1);
+  tpl->InstanceTemplate()->SetInternalFieldCount(2);
   SetPrototypeMethod(tpl, "log", SetterGetter::Log);
   v8::Local<v8::ObjectTemplate> itpl = tpl->InstanceTemplate();
   SetAccessor(

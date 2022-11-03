@@ -11,13 +11,6 @@
 
 #include <cstdint>
 
-namespace {
-  // this can be any value so long as it's 16bits and doesn't conflict
-  // with any chromium IDs:
-  // https://source.chromium.org/chromium/chromium/src/+/936f9f68:gin/public/gin_embedders.h;l=18
-  static uint16_t kEmbedderId = 0xBEEF;
-}
-
 class ObjectWrap {
  public:
   ObjectWrap() {
@@ -76,10 +69,9 @@ class ObjectWrap {
      * In Isolates(contexts?) with cppgc enabled, v8 assumes the first type slot
      * is a pointer to a "type info" struct which has an "Embedder ID" at the
      * first 2 bytes. If the first 2 bytes at `this` contain an ID that matches
-     * an internal one then multiple issues can happen(mostly it will segfault)
-     * as v8 assumes it's an internal object. Simple fix is to set the slot to
-     * an ID that doesn't match any internal embedders(notably blink) so v8
-     * doesn't try to mess with it.
+     * an internal one then multiple issues can happen(mostly it will segfault).
+     * Simple fix is to set the slot to an ID that doesn't match any internal
+     * embedders(notably blink) so v8 doesn't try to mess with it.
      **/
     SetInternalFieldPointer(object, InternalFields::kWrapperType, &kEmbedderId);
     SetInternalFieldPointer(object, InternalFields::kSlot, this);
@@ -180,6 +172,11 @@ class ObjectWrap {
 
 #endif
   Persistent<v8::Object> handle_;
+
+  // this can be any value so long as it's 16bits and doesn't conflict
+  // with any chromium IDs:
+  // https://source.chromium.org/chromium/chromium/src/+/936f9f68:gin/public/gin_embedders.h;l=18
+  uint16_t kEmbedderId = 0xBEEF;
 };
 
 
