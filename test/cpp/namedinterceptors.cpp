@@ -38,7 +38,7 @@ NAN_MODULE_INIT(NamedInterceptor::Init) {
     Nan::New<v8::FunctionTemplate>(NamedInterceptor::New);
   namedinterceptors_constructor.Reset(tpl);
   tpl->SetClassName(Nan::New("NamedInterceptor").ToLocalChecked());
-  tpl->InstanceTemplate()->SetInternalFieldCount(1);
+  tpl->InstanceTemplate()->SetInternalFieldCount(2);
   v8::Local<v8::ObjectTemplate> inst = tpl->InstanceTemplate();
 
   SetNamedPropertyHandler(

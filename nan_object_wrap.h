@@ -9,6 +9,8 @@
 #ifndef NAN_OBJECT_WRAP_H_
 #define NAN_OBJECT_WRAP_H_
 
+#include <cstdint>
+
 class ObjectWrap {
  public:
   ObjectWrap() {
@@ -29,10 +31,10 @@ class ObjectWrap {
   template <class T>
   static inline T* Unwrap(v8::Local<v8::Object> object) {
     assert(!object.IsEmpty());
-    assert(object->InternalFieldCount() > 0);
+    assert(object->InternalFieldCount() > InternalFields::kSlot);
     // Cast to ObjectWrap before casting to T.  A direct cast from void
     // to T won't work right when T has more than one base class.
-    void* ptr = GetInternalFieldPointer(object, 0);
+    void* ptr = GetInternalFieldPointer(object, InternalFields::kSlot);
     ObjectWrap* wrap = static_cast<ObjectWrap*>(ptr);
     return static_cast<T*>(wrap);
   }
@@ -49,10 +51,30 @@ class ObjectWrap {
 
 
  protected:
+  // These fields must match internal v8 EmbedderDataSlot Indicies.
+  // unfortunately they are not centralized anywhere so we have to make our own
+  // chromium examples:
+  // https://source.chromium.org/chromium/chromium/src/+/936f9f68:v8/src/heap/embedder-tracing.h;l=176
+  // https://source.chromium.org/chromium/chromium/src/+/936f9f68:gin/public/wrapper_info.h;l=19
+  enum InternalFields {
+    kWrapperType,
+    kSlot,
+    kInternalFieldCount
+  };
+
   inline void Wrap(v8::Local<v8::Object> object) {
     assert(persistent().IsEmpty());
-    assert(object->InternalFieldCount() > 0);
-    SetInternalFieldPointer(object, 0, this);
+    assert(object->InternalFieldCount() > InternalFields::kSlot);
+    /**
+     * In Isolates(contexts?) with cppgc enabled, v8 assumes the first type slot
+     * is a pointer to a "type info" struct which has an "Embedder ID" at the
+     * first 2 bytes. If the first 2 bytes at `this` contain an ID that matches
+     * an internal one then multiple issues can happen(mostly it will segfault).
+     * Simple fix is to set the slot to an ID that doesn't match any internal
+     * embedders(notably blink) so v8 doesn't try to mess with it.
+     **/
+    SetInternalFieldPointer(object, InternalFields::kWrapperType, &kEmbedderId);
+    SetInternalFieldPointer(object, InternalFields::kSlot, this);
     persistent().Reset(object);
     MakeWeak();
   }
@@ -150,6 +172,11 @@ class ObjectWrap {
 
 #endif
   Persistent<v8::Object> handle_;
+
+  // this can be any value so long as it's 16bits and doesn't conflict
+  // with any chromium IDs:
+  // https://source.chromium.org/chromium/chromium/src/+/936f9f68:gin/public/gin_embedders.h;l=18
+  uint16_t kEmbedderId = 0xBEEF;
 };
 
 
