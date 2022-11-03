@@ -1,6 +1,6 @@
 {
-  "name": "nan",
-  "version": "2.19.0",
+  "name": "@axosoft/nan",
+  "version": "2.19.0-gk.1",
   "description": "Native Abstractions for Node.js: C++ header for Node 0.8 -> 20 compatibility",
   "main": "include_dirs.js",
   "repository": {
