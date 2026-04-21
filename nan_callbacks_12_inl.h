@@ -159,8 +159,18 @@ class PropertyCallbackInfo {
 
   inline v8::Isolate* GetIsolate() const { return info_.GetIsolate(); }
   inline v8::Local<v8::Value> Data() const { return data_; }
+#if defined(V8_MAJOR_VERSION) &&                                               \
+    (V8_MAJOR_VERSION > 14 ||                                                  \
+     (V8_MAJOR_VERSION == 14 &&                                                \
+      (defined(V8_MINOR_VERSION) &&                                            \
+       (V8_MINOR_VERSION > 6 ||                                                \
+        (V8_MINOR_VERSION == 6 && defined(V8_BUILD_NUMBER) &&                  \
+         V8_BUILD_NUMBER >= 40)))))
+  inline v8::Local<v8::Object> Holder() const { return info_.HolderV2(); }
+#else
   inline v8::Local<v8::Object> This() const { return info_.This(); }
   inline v8::Local<v8::Object> Holder() const { return info_.Holder(); }
+#endif
   inline ReturnValue<T> GetReturnValue() const {
     return ReturnValue<T>(info_.GetReturnValue());
   }
